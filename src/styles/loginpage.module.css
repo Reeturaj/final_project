@@ -1,0 +1,174 @@
+.page {
+    min-height: 100vh;
+    background: #f0eeee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.bgImage {
+  position: fixed;
+  top: 15vh;
+  left: 0;
+  width: 35%;
+  height: 70vh;
+  z-index: 0;
+  pointer-events: none;
+  object-fit: cover;
+  object-position: left center;
+  user-select: none;
+  filter: blur(15px);
+  opacity: 0.85;
+  transform: scale(1.1);
+  transform-origin: left center;
+}
+
+
+.card {
+    z-index: 1;
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    width: 420px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    z-index: 1;
+    position: relative;
+    padding: 3rem 2.5rem 2.5rem 2.5rem;
+}
+
+.logoRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.brandName {
+    color: #b91c1c;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+    color: #111;
+     margin-top: 1.5rem;
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.8rem;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.input {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.875rem;
+    box-sizing: border-box;
+}
+
+
+
+.eyeIcon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.loginBtn {
+    width: 100%;
+    padding: 0.65rem;
+    background: #9b1c1c;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.85rem;
+    font-size: 0.8rem;
+}
+
+.rememberLabel {
+    display: flex;
+    align-items: center;
+    color: #444;
+    cursor: pointer;
+}
+
+.forgotLink {
+    color: #b91c1c;
+    text-decoration: none;
+}
+
+.footer {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footerLink {
+    font-size: 0.75rem;
+    color: #888;
+    text-decoration: underline;
+}
+.footerLinkca {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+
+
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.passwordWrapper input {
+  width: 100%;
+  padding-right: 40px; /* reserve space so text doesn't run under the icon */
+  box-sizing: border-box;
+}
+
+.eyeIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.eyeIcon:hover {
+  color: #4b5563;
+}
