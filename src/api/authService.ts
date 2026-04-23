@@ -1,127 +1,159 @@
-/**
- * Auth Service
- * Calls the Authentik API (or any OIDC/OAuth2 provider).
- * Replace VITE_AUTH_BASE_URL with your Authentik instance URL.
- *
- * Authentik endpoint reference:
- *   POST /api/v3/core/tokens/         – token exchange
- *   POST /application/o/token/        – OAuth2 password grant
- *   POST /application/o/revoke-token/ – logout
- */
+import CryptoJS from "crypto-js";
 
-import axios from 'axios'
-import type { LoginRequest, LoginResponse, AuthUser } from '@/types/auth'
+const LOGIN_URL =
+  "https://services-encr.iserveu.online/dev/nsdlab-internal/user-authorization/user/login";
 
-const AUTH_BASE_URL = import.meta.env.VITE_AUTH_BASE_URL || 'https://your-authentik.example.com'
-const CLIENT_ID     = import.meta.env.VITE_AUTH_CLIENT_ID || 'nsdl-admin'
-const CLIENT_SECRET = import.meta.env.VITE_AUTH_CLIENT_SECRET || ''
+const DASHBOARD_URL = "https://services-encr.iserveu.online/dev/nsdlab-internal/user-mgmt/user/dashboard";
 
-// Separate axios instance for auth — no JWT interceptor to avoid circular deps
-const authClient = axios.create({ baseURL: AUTH_BASE_URL })
+const BASIC_AUTH =
+  "Basic bnNkbGFiLWludGVybmFsLWNsaWVudDpuc2RsYWItaW50ZXJuYWwtcGFzc3dvcmQ=";
 
-// ─── Login ─────────────────────────────────────────────────────────
-export const authService = {
-  /**
-   * Exchange username + password for tokens via Authentik OAuth2 password grant.
-   *
-   * Authentik URL: POST /application/o/token/
-   * Body (x-www-form-urlencoded):
-   *   grant_type=password
-   *   client_id=<CLIENT_ID>
-   *   client_secret=<CLIENT_SECRET>
-   *   username=<username>
-   *   password=<password>
-   *   scope=openid profile email
-   */
-  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    // ── TODO: uncomment when Authentik is ready ──────────────────
-    // const params = new URLSearchParams({
-    //   grant_type:    'password',
-    //   client_id:     CLIENT_ID,
-    //   client_secret: CLIENT_SECRET,
-    //   username:      credentials.username,
-    //   password:      credentials.password,
-    //   scope:         'openid profile email',
-    // })
-    // const res = await authClient.post('/application/o/token/', params, {
-    //   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    // })
-    // const { access_token, refresh_token } = res.data
-    //
-    // Fetch user info
-    // const userRes = await authClient.get('/application/o/userinfo/', {
-    //   headers: { Authorization: `Bearer ${access_token}` },
-    // })
-    // return {
-    //   token:        access_token,
-    //   refreshToken: refresh_token,
-    //   user: {
-    //     id:       userRes.data.sub,
-    //     name:     userRes.data.name,
-    //     username: userRes.data.preferred_username,
-    //     role:     userRes.data.groups?.[0] ?? 'viewer',
-    //     email:    userRes.data.email,
-    //   },
-    // }
-    // ── END TODO ─────────────────────────────────────────────────
+const GEO_LOCATION = btoa(
+  JSON.stringify({
+    device: "WEB",
+    latitude: 20.3419933,
+    longitude: 85.8062196,
+    city: "Bhubaneswar",
+    country: "India",
+    continent: "Asia",
+  })
+);
 
-    // Mock login — remove once Authentik is connected
-    await new Promise(r => setTimeout(r, 800))
-    if (credentials.username === 'admin' && credentials.password === 'admin123') {
-      return {
-        token: 'mock-jwt-token-xyz',
-        refreshToken: 'mock-refresh-token',
-        user: {
-          id: 1,
-          name: 'Stebin Ben',
-          username: credentials.username,
-          role: 'admin',
-          email: 'stebin@nsdl.co.in',
-        },
-      }
+const SECRET_KEY = CryptoJS.enc.Base64.parse("a6T8tOCYiSzDTrcqPvCbJfy0wSQOVcfaevH0gtwCtoU=");
+
+// ─── Encrypt ────────────────────────────────────────────────────────────────
+const encryptPayload = (payload: object): string => {
+  const plainText = JSON.stringify(payload);
+  const iv = CryptoJS.lib.WordArray.random(16);
+  const encrypted = CryptoJS.AES.encrypt(plainText, SECRET_KEY, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+  const ivAndCiphertext = iv.concat(encrypted.ciphertext);
+  return CryptoJS.enc.Base64.stringify(ivAndCiphertext);
+};
+
+// ─── Decrypt ────────────────────────────────────────────────────────────────
+const decryptResponse = (encryptedB64: string): unknown => {
+  const rawData = CryptoJS.enc.Base64.parse(encryptedB64);
+  const iv = CryptoJS.lib.WordArray.create(rawData.words.slice(0, 4), 16);
+  const ciphertext = CryptoJS.lib.WordArray.create(
+    rawData.words.slice(4),
+    rawData.sigBytes - 16
+  );
+  const decrypted = CryptoJS.AES.decrypt(
+    { ciphertext } as CryptoJS.lib.CipherParams,
+    SECRET_KEY,
+    {
+      iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
     }
-    throw new Error('Invalid username or password')
-  },
+  );
+  return JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
+};
 
-  /**
-   * Revoke tokens on logout.
-   * Authentik URL: POST /application/o/revoke-token/
-   */
-  logout: async (): Promise<void> => {
-    // ── TODO: uncomment when Authentik is ready ──────────────────
-    // const token = localStorage.getItem('auth_token')
-    // if (token) {
-    //   await authClient.post('/application/o/revoke-token/', new URLSearchParams({
-    //     token,
-    //     client_id:     CLIENT_ID,
-    //     client_secret: CLIENT_SECRET,
-    //   }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-    // }
-    // ── END TODO ─────────────────────────────────────────────────
-    await new Promise(r => setTimeout(r, 300))
-  },
+// ─── Common headers ─────────────────────────────────────────────────────────
+const commonHeaders = (token?: string): Record<string, string> => ({
+  accept: "application/json, text/plain, */*",
+  "accept-language": "en-US,en;q=0.9",
+  authorization: token ? `Bearer ${token}` : BASIC_AUTH,
+  "content-type": "application/json",
+  "geo-location": GEO_LOCATION,
+});
 
-  /**
-   * Refresh access token.
-   * Authentik URL: POST /application/o/token/  (grant_type=refresh_token)
-   */
-  refresh: async (refreshToken: string): Promise<string> => {
-    // ── TODO: uncomment when Authentik is ready ──────────────────
-    // const params = new URLSearchParams({
-    //   grant_type:    'refresh_token',
-    //   client_id:     CLIENT_ID,
-    //   client_secret: CLIENT_SECRET,
-    //   refresh_token: refreshToken,
-    // })
-    // const res = await authClient.post('/application/o/token/', params, {
-    //   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    // })
-    // return res.data.access_token
-    // ── END TODO ─────────────────────────────────────────────────
-    return 'mock-refreshed-token'
-  },
+// ─── Types ───────────────────────────────────────────────────────────────────
+export interface LoginResponse {
+  ResponseData?: string;  // encrypted — decrypted shape below
+  token?: string;
+  accessToken?: string;
+  sKey?: string;
+  message?: string;
+  status?: string;
 }
 
-// Suppress unused variable warnings until real API is wired
-void CLIENT_ID
-void CLIENT_SECRET
+export interface LoginResult {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  adminName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobileNumber: number;
+  bankCode: string;
+  userType: string;
+  roleName: string;
+  privileges: string[];
+  scope: string[];
+  is2FA: boolean;
+  is2FAVerified: boolean;
+  isPasswordResetRequired: string;
+  passwordResetRequiredReason: string;
+}
+
+export interface DashboardData {
+  // update these fields once you see the actual decrypted response
+  [key: string]: unknown;
+}
+
+// ─── Login API ───────────────────────────────────────────────────────────────
+export const loginApi = async (
+  username: string,
+  password: string,
+  grant_type: string = "password"
+): Promise<LoginResult> => {
+  const requestData = encryptPayload({ username, password, grant_type });
+
+  const response = await fetch(
+    `${LOGIN_URL}`,
+    {
+      method: "POST",
+      headers: commonHeaders(),
+      body: JSON.stringify({ RequestData: requestData }),
+    }
+  );
+
+  if (!response.ok) throw new Error(`Login failed: ${response.status}`);
+
+  const json: LoginResponse = await response.json();
+
+  // If login response itself is encrypted, decrypt it
+const decrypted = json.ResponseData
+  ? (decryptResponse(json.ResponseData) as LoginResult)  // ← LoginResult not LoginResponse
+  : (json as unknown as LoginResult);
+ // console.log("Decrypted login response:", decrypted);
+  const token = decrypted.access_token ?? "";
+  
+  // Persist for subsequent calls
+  localStorage.setItem("token", token);
+ 
+  return decrypted;
+};
+
+// ─── Dashboard API ───────────────────────────────────────────────────────────
+export const getDashboardData = async (): Promise<DashboardData> => {
+  const token = localStorage.getItem("token") ?? "";
+
+  const response = await fetch(
+    `${DASHBOARD_URL}`,
+    {
+      method: "GET",
+      headers: commonHeaders(token),
+    }
+  );
+
+  if (!response.ok) throw new Error(`Dashboard failed: ${response.status}`);
+
+  const json = await response.json();
+
+  // Decrypt the response using sKey if needed
+  // If sKey differs per session, swap SECRET_KEY logic here
+  const decrypted = json.ResponseData
+    ? decryptResponse(json.ResponseData)
+    : json;
+
+  return decrypted as DashboardData;
+};

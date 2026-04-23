@@ -10,20 +10,27 @@
 }
 
 .bgImage {
-  position: fixed;
-  top: 15vh;
-  left: 0;
-  width: 35%;
-  height: 70vh;
-  z-index: 0;
-  pointer-events: none;
-  object-fit: cover;
-  object-position: left center;
-  user-select: none;
-  filter: blur(15px);
-  opacity: 0.85;
-  transform: scale(1.1);
-  transform-origin: left center;
+    position: fixed;
+    top: 15vh;
+    left: 0;
+    width: 35%;
+    height: 70vh;
+    z-index: 0;
+    pointer-events: none;
+    object-fit: cover;
+    object-position: left center;
+    user-select: none;
+    filter: blur(15px);
+    opacity: 0.85;
+    transform: scale(1.1);
+    transform-origin: left center;
+}
+
+.errorMsg {
+  color: #c0392b;
+  font-size: 13px;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 
@@ -59,7 +66,7 @@
     font-size: 1.15rem;
     margin-bottom: 1.5rem;
     color: #111;
-     margin-top: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .field {
@@ -136,39 +143,39 @@
     color: #888;
     text-decoration: underline;
 }
+
 .footerLinkca {
     font-size: 0.75rem;
     color: #888;
 }
 
-
-
 .passwordWrapper {
-  position: relative;
-  width: 100%;
+    position: relative;
+    width: 100%;
 }
 
 .passwordWrapper input {
-  width: 100%;
-  padding-right: 40px; /* reserve space so text doesn't run under the icon */
-  box-sizing: border-box;
+    width: 100%;
+    padding-right: 40px;
+    /* reserve space so text doesn't run under the icon */
+    box-sizing: border-box;
 }
 
 .eyeIcon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #9ca3af;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  padding: 4px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 4px;
 }
 
 .eyeIcon:hover {
-  color: #4b5563;
+    color: #4b5563;
 }
